@@ -265,22 +265,22 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
         
         print(f"Enter the values of x (< {nx}) and y (< {ny}) to compare the values")
         verify = 1
-        while verify == 1 :
-            x = int(input(f"Enter the value of x (< {nx - 1}): "))
-            y = int(input(f"Enter the value of y (< {ny - 1}): "))
+        while verify != -1 :
+            x = int(input(f"Enter the value of x (< {nx}): "))
+            y = int(input(f"Enter the value of y (< {ny}): "))
             print(f"Analytical Solution: {tTheory[y, x]}")
             print(f"Converged Solution: {tMesh[y, x]}")
             print(f"Error in Solution: {errorActual[y, x]}")
             verify = int(input("Enter any value to continue, and -1 to terminate the solution: "))
-            if verify != 1:
+            if verify == -1:
                 break
     verify = 1
-    while verify == 1 :
-        x = int(input(f"Enter the value of x (< {nx - 1}): "))
-        y = int(input(f"Enter the value of y (< {ny - 1}): "))
+    while verify != -1 :
+        x = int(input(f"Enter the value of x (< {nx}): "))
+        y = int(input(f"Enter the value of y (< {ny}): "))
         print(f"Converged Solution: {tMesh[y, x]}")
         verify = int(input("Enter any value to continue, and -1 to terminate the solution: "))
-        if verify != 1:
+        if verify == -1:
             break
 
 Lx = float(input("Enter the length of the specimen: "))
