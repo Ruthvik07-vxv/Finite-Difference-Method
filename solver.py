@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
- 
+
 
 ##  Creating a mesh of nx, ny  ##
 def CreateMesh(nx, ny, tTop = 0, tBottom = 0, tLeft = 0, tRight = 0) :
@@ -143,6 +143,8 @@ def theoreticalSolution(x, y, Lx, Ly, tTop, tBottom, tLeft, tRight, terms = 100)
     tFinal_Left = 0
     tFinal_Right = 0
 
+    tShift_top = tTop 
+
     for n in range(1, terms, 2) :
 
         # Top Layer #
@@ -153,13 +155,13 @@ def theoreticalSolution(x, y, Lx, Ly, tTop, tBottom, tLeft, tRight, terms = 100)
         
         # Left Layer #
         tFinal_Left += ((4 * (tLeft - tBottom) / (n * np.pi)) *
-              np.sinh(n * np.pi * x / Ly) /
+              np.sinh(n * np.pi * (Lx - x) / Ly) /
               np.sinh(n * np.pi * Lx / Ly) *
               np.sin(n * np.pi * y / Ly))
         
         # Right Layer #
         tFinal_Right += ((4 * (tRight - tBottom) / (n * np.pi)) *
-              np.sinh(n * np.pi * (Lx - x) / Ly) /
+              np.sinh(n * np.pi * x / Ly) /
               np.sinh(n * np.pi * Lx / Ly) *
               np.sin(n * np.pi * y / Ly))
         
@@ -181,20 +183,20 @@ def analyticalGrid(nx, ny, Lx, Ly, tTop, tBottom, tLeft, tRight) :
 
 
 ## Plotting temperature contours ##
-def PlotTemperature(tMesh) :
+def PlotTemperature(tMesh, name, plottype) :
     plt.contourf(tMesh, 200, cmap = "inferno")
     plt.colorbar()
-    plt.title("Temperature Field")
-    plt.savefig("Temperature Contours.png", dpi=300)
+    plt.title(plottype)
+    plt.savefig(name, dpi=300)
     print("Temperature Countours is saved as \"Temperature Countour.png\"")
     plt.show()
 
 
-def PlotIsotherms(tMesh) :
+def PlotIsotherms(tMesh, name, plottype) :
     cs = plt.contour(tMesh, 20)
     plt.clabel(cs, inline = True, fontsize = 8)
-    plt.title("Temperature Isotherms")
-    plt.savefig("Temperature Isotherms.png", dpi=300)
+    plt.title(plottype)
+    plt.savefig(name, dpi=300)
     print("Temperature Isotherms is saved as \"Temperature Isotherms.png\"")
     plt.show()
 
@@ -227,10 +229,10 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
         h = float(input("Enter the convective coefficient h: "))
         k = float(input("Enter the thermal conductivity of the material k: "))
         tInf = float(input("Enter the ambient temperature: "))
-        dirichlet_top = input("Is there is convection at the top surface(y/n): ").lower() == 'y'
-        dirichlet_bottom = input("Is there is convection at the Bottom surface(y/n): ").lower() == 'y'
-        dirichlet_left = input("Is there is convection at the Left surface(y/n): ").lower() == 'y'
-        dirichlet_right = input("Is there is convection at the Right surface(y/n): ").lower() == 'y'
+        dirichlet_top = input("Is there is convection at the top surface(y/n): ").lower() == 'n'
+        dirichlet_bottom = input("Is there is convection at the Bottom surface(y/n): ").lower() == 'n'
+        dirichlet_left = input("Is there is convection at the Left surface(y/n): ").lower() == 'n'
+        dirichlet_right = input("Is there is convection at the Right surface(y/n): ").lower() == 'n'
     else :
         h = 0
         k = 1
@@ -243,9 +245,9 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
     tMesh = CreateMesh(nx, ny, tTop, tBottom, tLeft, tRight)
     tMesh = Iterator(tMesh, nx, ny, tolerance, h, k, tInf, dirichlet_top, dirichlet_bottom, dirichlet_left, dirichlet_right)
 
-    PlotTemperature(tMesh)
-    PlotIsotherms(tMesh)
-    PlotCombined(tMesh)
+    PlotTemperature(np.fliplr(tMesh), "Temperature Countours.png", "Temperature Contours")
+    PlotIsotherms(np.fliplr(tMesh), "Temperature Isotherms.png", "Temperature Isotherms")
+    PlotCombined(np.fliplr(tMesh))
     saveTemperatureGrid(tMesh, 'ActualTemperature.txt')
     np.savetxt("TemperatureField.csv", np.flipud(tMesh), delimiter=",")
     print()
@@ -256,6 +258,8 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
         tTheory = analyticalGrid(nx, ny, Lx, Ly, tTop, tBottom, tLeft, tRight)
         print("Theoretical temperatures are created successfully")
         saveTemperatureGrid(tTheory, 'TheoreticalT.txt')
+        PlotTemperature(tTheory, "Theoretical temperature.png", "Temperature Contours")
+        PlotIsotherms(tTheory, "Theoretical isotherms.png", "Temperature Isotherms")
         np.savetxt("TheoreticalT.csv", np.flipud(tTheory), delimiter=",")
         print("Theoretical Temperatures are saved as TheoreticalT.txt and TheoreticalT.csv respectively")
         errorActual = np.abs(tMesh - tTheory)
@@ -264,18 +268,19 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
         print(f"Average error: {np.average(errorActual)}")
         np.savetxt("errorMap.csv", np.flipud(errorActual), delimiter=",")
         saveTemperatureGrid(errorActual, "errorMap.txt")
-        PlotTemperature(errorActual)
+        PlotTemperature(errorActual, "Error Graph.png", "Error Mapping")
         print("Error plot values is saved as errorMap.csv and errorMap.txt respectively")
         
         print(f"Enter the values of x (< {nx}) and y (< {ny}) to compare the values")
         verify = 1
         while verify != -1 :
+            np.allclose(tTheory, tMesh.T)
             x = int(input(f"Enter the value of x (< {nx}): "))
             y = int(input(f"Enter the value of y (< {ny}): "))
             print(f"Analytical Solution: {tTheory[y, x]}")
             print(f"Converged Solution: {tMesh[y, x]}")
             print(f"Error in Solution: {errorActual[y, x]}")
-            verify = int(input("Enter any value to continue, and -1 to terminate the solution: "))
+            verify = int(input("Enter any value to continue, and -1 to terminate the process: "))
             if verify == -1 :
                 sys.exit()
             else :
@@ -285,7 +290,7 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
         x = int(input(f"Enter the value of x (< {nx}): "))
         y = int(input(f"Enter the value of y (< {ny}): "))
         print(f"Converged Solution: {tMesh[y, x]}")
-        verify = int(input("Enter any value to continue, and -1 to terminate the solution: "))
+        verify = int(input("Enter any value to continue, and -1 to terminate the process: "))
         if verify == -1 :
                 sys.exit()
         else : 
