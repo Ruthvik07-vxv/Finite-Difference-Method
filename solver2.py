@@ -23,11 +23,7 @@ def CreateMesh(nx, ny, tTop = 0, tBottom = 0, tLeft = 0, tRight = 0) :
     return tMesh, fixed
 
 def fixedTemperatures(tMesh, fixed, x, y, nx, ny, temp) :
-<<<<<<< HEAD
-    if x > nx-1 or x < 0 :
-=======
     if x > nx-1 or x < 0:
->>>>>>> d6d3b0fb4d405717ab4ef7cad4c9e4eec547ab40
         print("Error! value of X coordinate is greater than the number of cells")
         x = int(input("Enter the value of x again: "))
         return fixedTemperatures(tMesh, fixed, x, y, nx, ny, temp)
@@ -96,13 +92,9 @@ def Iterator_HeatGeneration (tMesh, fixed, nx, ny, tolerance, length, height, q,
                 if fixed[i, j] :
                     continue
                     
-<<<<<<< HEAD
                 tMesh[i, j] = (((tMesh[i+1, j] + tMesh[i-1, j]) / dx**2) + 
                                ((tMesh[i, j+1] + tMesh[i, j-1]) / dy**2) + 
                                (q/k)) / ((2 / dx**2) + (2 / dy**2))
-=======
-                tMesh[i, j] = (((tMesh[i+1, j] + tMesh[i-1, j]) / dx**2) + ((tMesh[i, j+1] + tMesh[i, j-1]) / dy**2) + (q/k)) / ((2 / dx**2) + (2 / dy**2))
->>>>>>> d6d3b0fb4d405717ab4ef7cad4c9e4eec547ab40
                 change = abs(tMesh[i, j] - tOldMesh[i, j])
                 error = max(error, change)
         
@@ -225,8 +217,4 @@ elif HT == 2 :
     main_HeatGeneration(nx, ny, tTop, tBottom, tLeft, tRight, tolerance, q, k, Length, Height)
 
 else :
-<<<<<<< HEAD
     print("Wrong Choice! Try again")
-=======
-    print("Wrong Choice! Try again")
->>>>>>> d6d3b0fb4d405717ab4ef7cad4c9e4eec547ab40

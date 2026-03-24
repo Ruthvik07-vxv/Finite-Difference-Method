@@ -277,7 +277,7 @@ def main(nx = 40, ny = 40, tTop = 100, tBottom = 0, tLeft = 0, tRight = 0, toler
             np.allclose(tTheory, tMesh.T)
             x = int(input(f"Enter the value of x (< {nx}): "))
             y = int(input(f"Enter the value of y (< {ny}): "))
-            print(f"Analytical Solution: {tTheory[y, x]}")
+            print(f"nalytical Solution: {tTheory[y, x]}")
             print(f"Converged Solution: {tMesh[y, x]}")
             print(f"Error in Solution: {errorActual[y, x]}")
             verify = int(input("Enter any value to continue, and -1 to terminate the process: "))
