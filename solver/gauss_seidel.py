@@ -1,8 +1,8 @@
 import numpy as np
-import utils as ut
+from solver import utils as ut
 
 
-def update_gs(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right) :
+def update_gs(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= True) :
     
     iterations = 0
     max_iterations = 100000
@@ -89,7 +89,7 @@ def update_gs(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_b
         converged, error = ut.convergence_check(tMesh, tMesh_old, tolerance)
         iterations += 1
 
-        if iterations % 500 == 0 :
+        if verbose and iterations % 500 == 0 :
             print()
             print("Number of iterations: ", iterations)
             print("Converged error: ", error)

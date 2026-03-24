@@ -1,7 +1,7 @@
 import numpy as np
-import utils as ut
+from solver import utils as ut
 
-def update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right) :
+def update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= True) :
     
     iterations = 0
     max_iterations = 100000
@@ -88,7 +88,7 @@ def update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neuma
         converged, error = ut.convergence_check(tMesh, tMesh_old, tolerance)
         iterations += 1
 
-        if iterations % 500 == 0 :
+        if verbose and iterations % 500 == 0 :
             print()
             print("Number of iterations: ", iterations)
             print("Converged error: ", error)
@@ -96,13 +96,13 @@ def update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neuma
 
     if converged :
         print()
-        print("Convergence achieved")
-        print("Number of iterations taken for convergence: ", iterations)
+        print("Convergence achieved for jacobi")
+        print("Number of iterations taken for convergence in jacobi: ", iterations)
         print("Converged error: ", error)
 
     elif iterations >= max_iterations :
         print()
-        print("Maximum iterations reached without convergence.")
+        print("Maximum iterations reached without convergence for jacobi.")
         print("Possible converged error: ", error)
         print("Tolerace: ", tolerance)
         print("Consider adjusting the tolerance to achieve convergence.")

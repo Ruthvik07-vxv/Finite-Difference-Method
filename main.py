@@ -23,17 +23,21 @@ def run_solver(method, tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neuman
     tMesh_local = np.copy(tMesh)
     start = time.time()
     if method == "jacobi" :
-        result = jacobi_solver.update_jacobi(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
+        result = jacobi_solver.update_jacobi(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= False)
     elif method == "gauss-seidel" :
-        result = gs_solver.update_gs(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
+        result = gs_solver.update_gs(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= False)
     elif method == "sor" :
-        result = sor_solver.update_sor(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right)
+        result = sor_solver.update_sor(tMesh_local, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= False)
     end = time.time()
     return method, result, end - start
 
 def main() :
     length = float(input("Enter the length of the domain: "))
     width = float(input("Enter the width of the domain: "))
+    int_gen = input("Is there internal heat generation present (q)? (y/n): ").lower()
+    if int_gen != 'y' and int_gen != 'n' :
+        print("Invalid choice, please try again!")
+        sys.exit()
     nx = int(input("Enter the number of nodes in x direction(-1 to auto assign): "))
     if nx == -1 :
         nx = 40
@@ -95,48 +99,103 @@ def main() :
     Bi_x, Bi_y = ut.biot_number(h, k, length, width, tMesh)
     Bi = (Bi_x + Bi_y) / 2 
 
-    print()
-    print("Select the solver to use: ")
-    print("1. Jacobi")
-    print("2. Gauss-Seidel")
-    print("3. Successive Over-Relaxation (SOR)")
-    print("4. Run all solvers and compare results")
-    solver_choice = int(input("Enter the number corresponding to the solver: "))
-    if solver_choice == 1 :
-        tMesh = jacobi_solver.update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
-    elif solver_choice == 2 :
-        tMesh = gs_solver.update_gs(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
-    elif solver_choice == 3 :
-        omega = float(input("Enter the relaxation factor (0 < omega < 2): "))
-        if omega <= 0 or omega >= 2 :
-            print("Invalid relaxation factor! Please enter a value between 0 and 2.")
-            sys.exit(1)
-        tMesh = sor_solver.update_sor(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right)
-    elif solver_choice == 4 :
-        omega = float(input("Enter the relaxation factor (0 < omega < 2): "))
-        if omega <= 0 or omega >= 2 :
-            print("Invalid relaxation factor! Please enter a value between 0 and 2.")
-            sys.exit(1)
-        print("Running all solvers in parallel...")
-        methods = ["jacobi", "gauss-seidel", "sor"]
-        with mp.Pool(processes=3) as pool :
-            results = pool.starmap(run_solver, [(method, tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right) for method in methods])
-        for method, result, duration in results :
-            print(f"{method.capitalize()} solver completed in {duration:.2f} seconds.")
-            if method == "jacobi" :
-                tMesh_jacobi = result
-            elif method == "gauss-seidel" :
-                tMesh_gs = result
-            elif method == "sor" :
-                tMesh_sor = result
-    
-    else :
-        print("Wrong input! Try again")
-        return main()
-
     folder_name = "results"
     if not os.path.exists(folder_name) :
         os.makedirs(folder_name)
+
+    print()
+    if int_gen == 'y' :
+        q = float(input("Enter the internal heat generation rate q: "))
+        k_mat = float(input("Enter the thermal conductivity k: "))
+        print("Running Gauss-Seidel (Poisson) solver...")
+        start = time.time()
+        tMesh = gs_solver.update_gs_heat_generation(tMesh, fixed, nx, ny, tolerance, length, width, q, k_mat, h, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
+        duration = time.time() - start
+        print()
+        print("Benchmark Results (Internal Heat Generation)")
+        print("-----------------------------------------------------")
+        print(f"{'Method':20s}{'Time (s)':>12s}")
+        print(f"{'Gauss-Seidel (Poisson)':20s}{duration:12.4f}")
+    else :
+        print("Select the solver to use: ")
+        print("1. Jacobi")
+        print("2. Gauss-Seidel")
+        print("3. Successive Over-Relaxation (SOR)")
+        print("4. Run all solvers and compare results")
+        solver_choice = int(input("Enter the number corresponding to the solver: "))
+        if solver_choice == 1 :
+            start = time.time()
+            tMesh = jacobi_solver.update_jacobi(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
+            duration = time.time() - start
+            print()
+            print("Benchmark Results")
+            print("-----------------------------------------------------")
+            print(f"{'Method':20s}{'Time (s)':>12s}")
+            print(f"{'Jacobi':20s}{duration:12.4f}")
+        elif solver_choice == 2 :
+            start = time.time()
+            tMesh = gs_solver.update_gs(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, neumann_top, neumann_bottom, neumann_left, neumann_right)
+            duration = time.time() - start
+            print()
+            print("Benchmark Results")
+            print("-----------------------------------------------------")
+            print(f"{'Method':20s}{'Time (s)':>12s}")
+            print(f"{'Gauss-Seidel':20s}{duration:12.4f}")
+        elif solver_choice == 3 :
+            omega = float(input("Enter the relaxation factor (0 < omega < 2): "))
+            if omega <= 0 or omega >= 2 :
+                print("Invalid relaxation factor! Please enter a value between 0 and 2.")
+                sys.exit(1)
+            start = time.time()
+            tMesh = sor_solver.update_sor(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right)
+            duration = time.time() - start
+            print()
+            print("Benchmark Results")
+            print("-----------------------------------------------------")
+            print(f"{'Method':20s}{'Time (s)':>12s}")
+            print(f"{'SOR':20s}{duration:12.4f}")
+        elif solver_choice == 4 :
+            omega = float(input("Enter the relaxation factor (0 < omega < 2): "))
+            if omega <= 0 or omega >= 2 :
+                print("Invalid relaxation factor! Please enter a value between 0 and 2.")
+                sys.exit(1)
+            print("Running all solvers in parallel...")
+            methods = ["jacobi", "gauss-seidel", "sor"]
+            with mp.Pool(processes=3) as pool :
+                results = pool.starmap(run_solver, [(method, tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right) for method in methods])
+            print()
+            print("Benchmark Results")
+            print("----------------------------------------------------------------")
+            print(f"{'Method':20s}{'Time (s)':>12s}")
+            for method, result, duration in results :
+                print(f"{method.capitalize():20s}{duration:12.4f}")
+                if method == "jacobi" :
+                    tMesh_jacobi = result
+                    file_path_jacobi_1 = os.path.join(folder_name, "jacobi_temperature_contour.txt")
+                    file_path_jacobi_2 = os.path.join(folder_name, "jacobi_temperature_contour.csv")
+                    pp.saveTemperatureGrid(tMesh_jacobi, file_path_jacobi_1)
+                    pp.save_CSV(tMesh_jacobi, file_path_jacobi_2)
+                elif method == "gauss-seidel" :
+                    tMesh_gs = result
+                    file_path_gs_1 = os.path.join(folder_name, "gauss-seidel_temperature_contour.txt")
+                    file_path_gs_2 = os.path.join(folder_name, "gauss-seidel_temperature_contour.csv")
+                    pp.saveTemperatureGrid(tMesh_gs, file_path_gs_1)
+                    pp.save_CSV(tMesh_gs, file_path_gs_2)
+                elif method == "sor" :
+                    tMesh_sor = result
+                    file_path_sor_1 = os.path.join(folder_name, "sor_temperature_contour.txt")
+                    file_path_sor_2 = os.path.join(folder_name, "sor_temperature_contour.csv")
+                    pp.saveTemperatureGrid(tMesh_sor, file_path_sor_1)
+                    pp.save_CSV(tMesh_sor, file_path_sor_2)
+            best = min(results, key=lambda x: x[2])
+            print("----------------------------------------------------------------")
+            print(f"The fastest solver is: {best[0].capitalize()} with a time of {best[2]:.4f} seconds.")
+            tMesh = best[1] 
+        else :
+            print("Wrong input! Try again")
+            return main()
+    
+    
     file_path = os.path.join(folder_name, "temperature_contour.png")
     pp.plot_temperature_contours(tMesh, title="Temperature Contour", save_path=file_path)
 
@@ -152,7 +211,9 @@ def main() :
     file_path_5 = os.path.join(folder_name, "Temperature_calculated.csv")
     pp.save_CSV(tMesh, file_path_5)
 
-    if conv != 'y' :
+    if conv != 'y' and int_gen != 'y' :
+        print()
+        print()
         print("Analytical Solution: ")
         tAnalytical = th_solver.analyticalGrid(nx, ny, length, width, tTop, tBottom, tLeft, tRight)
         print("Theoretical temperatures are calculated successfully.")

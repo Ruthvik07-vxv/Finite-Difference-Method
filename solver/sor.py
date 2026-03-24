@@ -1,8 +1,8 @@
 import sys
 import numpy as np
-import utils as ut
+from solver import utils as ut
 
-def update_sor(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right) :
+def update_sor(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, neumann_bottom, neumann_left, neumann_right, verbose= True) :
     
     iterations = 0
     max_iterations = 100000
@@ -108,24 +108,24 @@ def update_sor(tMesh, fixed, nx, ny, tolerance, Bi, t_Inf, omega, neumann_top, n
         converged, error = ut.convergence_check(tMesh, tMesh_old, tolerance)
         iterations += 1
 
-        if iterations % 500 == 0 :
+        if verbose and iterations % 500 == 0 :
             print()
-            print("Number of iterations: ", iterations)
+            print("Number of iterations for SOR: ", iterations)
             print("Converged error: ", error)
             print("Running status: true")
 
             
     if converged :
         print()
-        print("Convergence achieved")
-        print("Number of iterations taken for convergence: ", iterations)
-        print("Converged error: ", error)
+        print("Convergence achieved for SOR")
+        print("Number of iterations taken for convergence in SOR: ", iterations)
+        print("Converged error in SOR: ", error)
         
 
     elif iterations >= max_iterations :
         print()
-        print("Maximum iterations reached without convergence.")
-        print("Possible converged error: ", error)
+        print("Maximum iterations reached without convergence for SOR.")
+        print("Possible converged error : ", error)
         print("Tolerace: ", tolerance)
         print("Consider adjusting the tolerance to achieve convergence.")
 
