@@ -108,7 +108,7 @@ Install the required Python libraries using pip:
 ## Future Work
 
 * Improve convergence tracking.
-* Extend the solver to transient (unsteady) conduction.
+* Optimize the solver for unsteady (transient) heat conduction.
 * Add support for more complex boundary conditions.
 
 ---
