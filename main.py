@@ -195,7 +195,6 @@ def main() :
             print("Wrong input! Try again")
             return main()
     
-    
     file_path = os.path.join(folder_name, "temperature_contour.png")
     pp.plot_temperature_contours(tMesh, title="Temperature Contour", save_path=file_path)
 

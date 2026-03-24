@@ -55,6 +55,8 @@ def convective_layer_right() :
         print("Wrong input! Try again")
         return convective_layer_right()
 
+    return neumann_right
+
 def check_convection_boundaries(fixed) :
     conv = input("Is convection present at any of the boundaries? (y/n): ").lower()
     if conv == 'n' :
