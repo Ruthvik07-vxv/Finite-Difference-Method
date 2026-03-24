@@ -27,6 +27,7 @@ The solution is obtained by iteratively updating grid values until the specified
 
 The codebase is organized into a modular pipeline, separating grid generation, boundary logic, numerical solvers, and data export.
 
+```
 .
 ├── main.py
 ├── mesh.py
@@ -38,6 +39,7 @@ The codebase is organized into a modular pipeline, separating grid generation, b
     ├── jacobi.py
     ├── sor.py
     └── utils.py
+```
 
 * `main.py`: The core execution script handling user inputs and parallel processing.
 * `mesh.py`: Initializes the computational grid and Dirichlet fixed-temperature nodes.
