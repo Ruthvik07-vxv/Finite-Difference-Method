@@ -49,25 +49,25 @@ def main() :
 
     print()
 
-    tTop = float(input("Enter the temperature of the Top surface: "))
+    tTop = float(input("Enter the temperature of the Top surface(-1 if not specified): "))
     if tTop == -1 :
         tTop = 0
     if tTop <= -273.15 :
         print("Error in temperature, cannot be less than -273.15 in celsius")
         sys.exit()
-    tBottom = float(input("Enter the temperature of the Bottom surface: "))
+    tBottom = float(input("Enter the temperature of the Bottom surface(-1 if not specified): "))
     if tBottom == -1 :
         tBottom = 0
     if tBottom <= -273.15 :
         print("Error in temperature, cannot be less than -273.15 in celsius")
         sys.exit()
-    tLeft = float(input("Enter the temperature of the Left surface: "))
+    tLeft = float(input("Enter the temperature of the Left surface(-1 if not specified): "))
     if tLeft == -1 :
         tLeft = 0
     if tLeft <= -273.15 :
         print("Error in temperature, cannot be less than -273.15 in celsius")
         sys.exit()
-    tRight = float(input("Enter the temperature of the Right surface: "))
+    tRight = float(input("Enter the temperature of the Right surface(-1 if not specified): "))
     if tRight == -1 :
         tRight = 0
     if tRight <= -273.15 :
